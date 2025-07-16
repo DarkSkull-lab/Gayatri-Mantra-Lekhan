@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gayatri Mantra</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700&family=Noto+Serif+Devanagari:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-image: url('https://i.pinimg.com/originals/6c/70/e5/6c70e5fda0ef61c37695839eb286877e.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: #ff0000; /* Red text for all text elements */
+            font-family: 'Noto Serif', serif;
+        }
+        .container {
+            max-width: 600px;
+            margin: 3rem auto;
+            padding: 2.5rem;
+        }
+        .progress-bar {
+            height: 25px;
+            background-color: #4a4a4a;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #f59e0b;
+        }
+        .progress {
+            height: 100%;
+            background: linear-gradient(to right, #f59e0b, #d97706);
+            transition: width 0.5s ease-in-out;
+        }
+        .corner-image {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .corner-image:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.7);
+        }
+        .submit-btn {
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+        }
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.8);
+            background-color: #d97706;
+        }
+        textarea {
+            font-family: 'Noto Serif Devanagari', serif;
+            color: #8b0000; /* Dark red text for typed mantra */
+            font-weight: bold; /* Bold text */
+            background-color: #ffffff; /* White background for visibility */
+            transition: border-color 0.3s ease;
+            border: 2px solid #000000; /* Clear black border */
+            font-size: 1.125rem; /* Slightly larger font size */
+        }
+        textarea:focus {
+            border-color: #f59e0b;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+            outline: none;
+        }
+        select {
+            font-family: 'Noto Serif Devanagari', serif;
+            transition: border-color 0.3s ease;
+            font-size: 1.125rem; /* Slightly larger font size */
+        }
+        select:focus {
+            border-color: #f59e0b;
+            outline: none;
+        }
+        .devanagari {
+            font-family: 'Noto Serif Devanagari', serif;
+        }
+        .text-bordered {
+            text-shadow: 
+                -1px -1px 0 #000000,  
+                1px -1px 0 #000000,
+                -1px 1px 0 #000000,
+                1px 1px 0 #000000; /* Black border effect around text */
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+    <div class="fixed top-4 left-4">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ8fv3TPTX7gkDTMIyI6qEtI-NIz96AQs-xhg&s" alt="Left Corner Image" class="w-28 h-28 object-cover rounded-full corner-image">
+    </div>
+    <div class="fixed top-4 right-4">
+        <img src="https://img500.exportersindia.com/product_images/bc-500/dir_45/1330634/hand-mashal-1200889.jpg" alt="Right Corner Image" class="w-28 h-28 object-cover rounded-full corner-image">
+    </div>
+    <div class="container mx-auto mt-36">
+        <h1 class="text-5xl font-bold text-center mb-8 devanagari text-bordered">Gayatri Mantra</h1>
+        <div class="mb-6">
+            <label class="block text-xl font-semibold mb-2 devanagari text-bordered">Select Language / भाषा चुनें</label>
+            <select id="language" class="mt-1 block w-full p-3 border rounded devanagari text-black">
+                <option value="hindi">Hindi / हिंदी</option>
+                <option value="hinglish">Hinglish / हिंग्लिश</option>
+            </select>
+        </div>
+        <div class="mb-6">
+            <p id="mantraHint" class="text-base mb-3 italic devanagari text-bordered">Correct mantra: <em>ॐ भूर्भुवः स्वः तत्सवितुर्वरेण्यं भर्गो देवस्य धीमहि धियो यो नः प्रचोदयात्</em></p>
+            <label class="block text-xl font-semibold mb-2 devanagari text-bordered">Type Gayatri Mantra / गायत्री मंत्र टाइप करें (Attempt <span id="attempt">1</span>/3)</label>
+            <textarea id="mantraInput" rows="5" class="mt-1 block w-full p-3 border rounded devanagari" placeholder="Type the mantra here..." onpaste="return false;"></textarea>
+            <p id="error" class="text-red-400 text-base mt-2 hidden devanagari text-bordered"></p>
+        </div>
+        <button id="submitBtn" class="w-full submit-btn bg-amber-600 text-white p-3 rounded-lg font-bold devanagari text-bordered">Submit / जमा करें</button>
+        <div class="mt-6 text-center">
+            <p class="text-xl devanagari text-bordered">Your Points / आपके अंक: <span id="points">0</span></p>
+            <p id="reward" class="text-green-400 text-xl hidden devanagari text-bordered">Congratulations! You've earned a reward: <span id="rewardText"></span> / बधाई हो! आपने एक पुरस्कार अर्जित किया: <span id="rewardText"></span></p>
+            <div class="mt-4">
+                <h2 class="text-2xl font-semibold mb-3 devanagari text-bordered">Your Progress / आपकी प्रगति</h2>
+                <div class="progress-bar">
+                    <div id="progress" class="progress" style="width: 0%"></div>
+                </div>
+                <p class="text-base mt-3 devanagari text-bordered">Progress to 1000 points / 1000 अंकों तक की प्रगति: <span id="progressPercentage">0%</span></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const hindiMantra = "ॐ भूर्भुवः स्वः तत्सवितुर्वरेण्यं भर्गो देवस्य धीमहि धियो यो नः प्रचोदयात्";
+        const hinglishMantra = "Om Bhur Bhuvah Swah Tat Savitur Varenyam Bhargo Devasya Dheemahi Dhiyo Yo Nah Prachodayat";
+        const maxAttempts = 3;
+        let currentAttempt = 1;
+        let points = localStorage.getItem('points') ? parseInt(localStorage.getItem('points')) : 0;
+        let attempts = [];
+
+        // Initialize points and progress
+        document.getElementById('points').textContent = points;
+        updateProgress();
+
+        // Prevent copy-paste
+        document.getElementById('mantraInput').addEventListener('paste', (e) => e.preventDefault());
+
+        // Function to normalize text for comparison
+        function normalizeText(text) {
+            return text.trim().toLowerCase().replace(/\s+/g, ' ').replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '');
+        }
+
+        // Function to check if input is close enough to the correct mantra
+        function isMantraCorrect(input, correctMantra) {
+            const inputWords = normalizeText(input).split(' ');
+            const correctWords = normalizeText(correctMantra).split(' ');
+            let differences = 0;
+            if (inputWords.length !== correctWords.length) return false;
+            for (let i = 0; i < inputWords.length; i++) {
+                if (inputWords[i] !== correctWords[i]) differences++;
+                if (differences > 2) return false; // Allow up to 2 word differences
+            }
+            return true;
+        }
+
+        // Function to update progress bar
+        function updateProgress() {
+            const percentage = (points / 1000) * 100;
+            document.getElementById('progress').style.width = `${percentage}%`;
+            document.getElementById('progressPercentage').textContent = `${percentage.toFixed(2)}%`;
+        }
+
+        // Function to award rewards based on points
+        function checkReward() {
+            const rewards = [
+                { points: 30, text: "Bronze Badge / कांस्य बैज" },
+                { points: 60, text: "Silver Badge / रजत बैज" },
+                { points: 100, text: "Gold Badge / स्वर्ण बैज" }
+            ];
+            for (const reward of rewards) {
+                if (points >= reward.points && !localStorage.getItem(`reward_${reward.points}`)) {
+                    document.getElementById('reward').classList.remove('hidden');
+                    document.getElementById('rewardText').textContent = reward.text;
+                    localStorage.setItem(`reward_${reward.points}`, true);
+                    setTimeout(() => document.getElementById('reward').classList.add('hidden'), 5000);
+                    break;
+                }
+            }
+        }
+
+        // Submit button handler
+        document.getElementById('submitBtn').addEventListener('click', () => {
+            const input = document.getElementById('mantraInput').value;
+            const language = document.getElementById('language').value;
+            const correctMantra = language === 'hindi' ? hindiMantra : hinglishMantra;
+            const error = document.getElementById('error');
+
+            if (!input.trim()) {
+                error.classList.remove('hidden');
+                error.textContent = language === 'hindi' ? "कृपया मंत्र दर्ज करें।" : "Please enter the mantra.";
+                return;
+            }
+
+            if (isMantraCorrect(input, correctMantra)) {
+                attempts.push(input);
+                error.classList.add('hidden');
+                document.getElementById('mantraInput').value = '';
+                currentAttempt++;
+                document.getElementById('attempt').textContent = currentAttempt;
+
+                if (currentAttempt > maxAttempts) {
+                    points += 10;
+                    localStorage.setItem('points', points);
+                    document.getElementById('points').textContent = points;
+                    currentAttempt = 1;
+                    document.getElementById('attempt').textContent = currentAttempt;
+                    attempts = [];
+                    updateProgress();
+                    checkReward();
+                    alert(language === 'hindi' ? 'सफलता! आपने 10 अंक अर्जित किए।' : 'Success! You earned 10 points.');
+                }
+            } else {
+                error.classList.remove('hidden');
+                error.textContent = language === 'hindi' ? "कृपया मंत्र को ठीक करें।" : "Please correct the mantra.";
+            }
+        });
+
+        // Update placeholder and hint based on language selection
+        document.getElementById('language').addEventListener('change', (e) => {
+            const language = e.target.value;
+            const placeholder = language === 'hindi' ? hindiMantra : hinglishMantra;
+            document.getElementById('mantraInput').placeholder = placeholder;
+            document.getElementById('mantraHint').innerHTML = `Correct mantra: <em>${placeholder}</em>`;
+        });
+
+        // Initialize placeholder and hint
+        document.getElementById('mantraInput').placeholder = document.getElementById('language').value === 'hindi' ? hindiMantra : hinglishMantra;
+        document.getElementById('mantraHint').innerHTML = `Correct mantra: <em>${document.getElementById('language').value === 'hindi' ? hindiMantra : hinglishMantra}</em>`;
+    </script>
+</body>
+</html>
