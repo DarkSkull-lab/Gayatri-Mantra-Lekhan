@@ -43,12 +43,6 @@
         .submit-btn {
             transition: all 0.3s ease;
             box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
-            color: #000000; /* Black text for button */
-            text-shadow: 
-                -1px -1px 0 #ffff00,  
-                1px -1px 0 #ffff00,
-                -1px 1px 0 #ffff00,
-                1px 1px 0 #ffff00; /* Yellow border effect for button text */
         }
         .submit-btn:hover {
             transform: translateY(-2px);
@@ -83,17 +77,79 @@
         }
         .text-bordered {
             text-shadow: 
-                -1px -1px 0 #ffff00,  
-                1px -1px 0 #ffff00,
-                -1px 1px 0 #ffff00,
-                1px 1px 0 #ffff00; /* Yellow border effect around text */
+                -1px -1px 0 #ffffff,  
+                1px -1px 0 #ffffff,
+                -1px 1px 0 #ffffff,
+                1px 1px 0 #ffffff; /* White border effect around text */
         }
-        .mantra-label {
-            font-size: 1rem; /* Smaller font size for Type Gayatri Mantra label */
+        .keyboard-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-width: 100%;
+            margin: 0 auto;
+            transition: transform 0.3s ease, opacity 0.3s ease;
         }
-        .mantra-hint {
-            font-size: 1.75rem; /* Larger font size for reference mantra */
-            font-weight: bold; /* Bold text for reference mantra */
+        .keyboard-container.hidden {
+            transform: translateY(100%);
+            opacity: 0;
+            pointer-events: none;
+        }
+        .suggestion {
+            background: #2d2d2d;
+            color: #ffffff;
+            padding: 0.5rem;
+            text-align: center;
+            font-family: 'Noto Serif Devanagari', serif;
+            font-size: 1.1rem;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .suggestion:hover {
+            background-color: #4a4a4a;
+        }
+        .keyboard {
+            background: #2d2d2d;
+            padding: 0.5rem;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+        }
+        .keyboard-row {
+            display: flex;
+            justify-content: center;
+            gap: 0.25rem;
+        }
+        .keyboard-btn {
+            background: #4a4a4a;
+            color: #ffffff;
+            padding: 0.5rem;
+            border-radius: 5px;
+            font-family: 'Noto Serif Devanagari', serif;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: 1px solid #666;
+            min-width: 2rem;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+        .keyboard-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        .keyboard-btn.space-btn {
+            width: 8rem;
+            font-size: 0.9rem;
+            background: #666;
+        }
+        .keyboard-btn.backspace-btn {
+            width: 3rem;
+            font-size: 0.9rem;
+            background: #666;
         }
     </style>
 </head>
@@ -114,12 +170,20 @@
             </select>
         </div>
         <div class="mb-6">
-            <p id="mantraHint" class="text-base mb-3 italic devanagari text-bordered mantra-hint">Correct mantra: <em>ॐ भूर्भुवः स्वः तत्सवितुर्वरेण्यं भर्गो देवस्य धीमहि धियो यो नः प्रचोदयात्</em></p>
-            <label class="block font-semibold mb-2 devanagari text-bordered mantra-label">Type Gayatri Mantra / गायत्री मंत्र टाइप करें (Attempt <span id="attempt">1</span>/3)</label>
-            <textarea id="mantraInput" rows="5" class="mt-1 block w-full p-3 border rounded devanagari" placeholder="Type the mantra here..." onpaste="return false;"></textarea>
+            <p id="mantraHint" class="text-base mb-3 italic devanagari text-bordered">Correct mantra: <em>ॐ भूर्भुवः स्वः तत्सवितुर्वरेण्यं भर्गो देवस्य धीमहि धियो यो नः प्रचोदयात्</em></p>
+            <label class="block text-xl font-semibold mb-2 devanagari text-bordered">Type Gayatri Mantra / गायत्री मंत्र टाइप करें (Attempt <span id="attempt">1</span>/3)</label>
+            <textarea id="mantraInput" rows="5" class="mt-1 block w-full p-3 border rounded devanagari" placeholder="Type the mantra here..."></textarea>
+            <div id="virtualKeyboard" class="keyboard-container hidden">
+                <div id="suggestion" class="suggestion"></div>
+                <div class="keyboard">
+                    <div class="keyboard-row"></div>
+                    <div class="keyboard-row"></div>
+                    <div class="keyboard-row"></div>
+                </div>
+            </div>
             <p id="error" class="text-red-400 text-base mt-2 hidden devanagari text-bordered"></p>
         </div>
-        <button id="submitBtn" class="w-full submit-btn bg-amber-600 p-3 rounded-lg font-bold devanagari">Submit / जमा करें</button>
+        <button id="submitBtn" class="w-full submit-btn bg-amber-600 text-black p-3 rounded-lg font-bold devanagari text-bordered">Submit / जमा करें</button>
         <div class="mt-6 text-center">
             <p class="text-xl devanagari text-bordered">Your Points / आपके अंक: <span id="points">0</span></p>
             <p id="reward" class="text-green-400 text-xl hidden devanagari text-bordered">Congratulations! You've earned a reward: <span id="rewardText"></span> / बधाई हो! आपने एक पुरस्कार अर्जित किया: <span id="rewardText"></span></p>
@@ -135,7 +199,7 @@
 
     <script>
         const hindiMantra = "ॐ भूर्भुवः स्वः तत्सवितुर्वरेण्यं भर्गो देवस्य धीमहि धियो यो नः प्रचोदयात्";
-        const hinglishMantra = "Om Bhur Bhuvah Swah Tat Savitur Varenyam Bhargo Devasya Dheemahi Dhiyo Yonah Prachodayat";
+        const hinglishMantra = "Om Bhur Bhuvah Swah Tat Savitur Varenyam Bhargo Devasya Dheemahi Dhiyo Yo Nah Prachodayat";
         const maxAttempts = 3;
         let currentAttempt = 1;
         let points = localStorage.getItem('points') ? parseInt(localStorage.getItem('points')) : 0;
@@ -148,58 +212,164 @@
         // Prevent copy-paste
         document.getElementById('mantraInput').addEventListener('paste', (e) => e.preventDefault());
 
-        // Function to normalize text for comparison
-        function normalizeText(text) {
-            return text.trim().toLowerCase()
-                .replace(/[,.\\/#!$%^&*;:{}=_`~()]/g, '') // Remove punctuation
-                .replace(/\s+/g, ' ') // Normalize spaces
-                .replace(/yo\s+nah/, 'yonah'); // Treat "yo nah" as "yonah"
+        // Virtual keyboard for Hindi input
+        const keyboardLayout = [
+            ['ॐ', 'भ', 'र', 'ब', 'ह', 'व', 'स', 'त', 'ण', 'य'],
+            ['ग', 'द', 'ध', 'म', 'च', 'ु', 'ू', 'ि', 'े', 'ी'],
+            ['ः', 'ं', 'ा', '्', ' ', 'X']
+        ];
+        const keyboardDiv = document.getElementById('virtualKeyboard');
+        const suggestionDiv = document.getElementById('suggestion');
+        function setupVirtualKeyboard() {
+            keyboardDiv.innerHTML = '<div class="keyboard-row"></div><div class="keyboard-row"></div><div class="keyboard-row"></div>';
+            const rows = keyboardDiv.getElementsByClassName('keyboard-row');
+            keyboardLayout.forEach((row, index) => {
+                row.forEach(char => {
+                    const button = document.createElement('button');
+                    button.textContent = char === ' ' ? 'Space' : char === 'X' ? 'X' : char;
+                    button.className = char === ' ' ? 'keyboard-btn space-btn' : char === 'X' ? 'keyboard-btn backspace-btn' : 'keyboard-btn';
+                    button.addEventListener('click', () => {
+                        const textarea = document.getElementById('mantraInput');
+                        const start = textarea.selectionStart;
+                        const end = textarea.selectionEnd;
+                        const text = textarea.value;
+                        if (char === 'X') {
+                            if (start > 0) {
+                                textarea.value = text.slice(0, start - 1) + text.slice(end);
+                                textarea.selectionStart = textarea.selectionEnd = start - 1;
+                            }
+                        } else {
+                            const insertChar = char === ' ' ? ' ' : char;
+                            textarea.value = text.slice(0, start) + insertChar + text.slice(end);
+                            textarea.selectionStart = textarea.selectionEnd = start + insertChar.length;
+                        }
+                        updateSuggestion();
+                        textarea.focus();
+                    });
+                    rows[index].appendChild(button);
+                });
+            });
         }
 
-        // Function to calculate Levenshtein distance for spelling tolerance
-        function levenshteinDistance(a, b) {
-            const matrix = [];
-            for (let i = 0; i <= b.length; i++) {
-                matrix[i] = [i];
-            }
-            for (let j = 0; j <= a.length; j++) {
-                matrix[0][j] = j;
-            }
-            for (let i = 1; i <= b.length; i++) {
-                for (let j = 1; j <= a.length; j++) {
-                    if (b.charAt(i - 1) === a.charAt(j - 1)) {
-                        matrix[i][j] = matrix[i - 1][j - 1];
-                    } else {
-                        matrix[i][j] = Math.min(
-                            matrix[i - 1][j - 1] + 1,
-                            matrix[i][j - 1] + 1,
-                            matrix[i - 1][j] + 1
-                        );
+        // Update suggestion based on input
+        function updateSuggestion() {
+            const textarea = document.getElementById('mantraInput');
+            const input = textarea.value.trim();
+            let suggestion = 'ॐ'; // Default suggestion
+            if (input) {
+                if (hindiMantra.startsWith(input)) {
+                    const nextIndex = input.length;
+                    if (nextIndex < hindiMantra.length) {
+                        const nextChar = hindiMantra[nextIndex];
+                        suggestion = nextChar;
+                        // Suggest next word if possible
+                        const words = hindiMantra.split(' ');
+                        let matched = false;
+                        for (let i = 0; i < words.length; i++) {
+                            if (words.slice(0, i + 1).join(' ').startsWith(input)) {
+                                const nextWord = words[i + 1];
+                                if (nextWord) {
+                                    suggestion = nextWord;
+                                    matched = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!matched && nextIndex + 1 < hindiMantra.length) {
+                            suggestion = hindiMantra.slice(nextIndex, nextIndex + 2);
+                        }
                     }
                 }
             }
+            suggestionDiv.textContent = suggestion;
+        }
+
+        // Show/hide virtual keyboard and update suggestion
+        const textarea = document.getElementById('mantraInput');
+        document.getElementById('language').addEventListener('change', (e) => {
+            const language = e.target.value;
+            const placeholder = language === 'hindi' ? hindiMantra : hinglishMantra;
+            document.getElementById('mantraInput').placeholder = placeholder;
+            document.getElementById('mantraHint').innerHTML = `Correct mantra: <em>${placeholder}</em>`;
+            keyboardDiv.classList.toggle('hidden', language !== 'hindi');
+            if (language === 'hindi' && document.activeElement === textarea) {
+                keyboardDiv.classList.remove('hidden');
+                setupVirtualKeyboard();
+                updateSuggestion();
+            } else {
+                keyboardDiv.classList.add('hidden');
+            }
+        });
+
+        textarea.addEventListener('focus', () => {
+            if (document.getElementById('language').value === 'hindi') {
+                keyboardDiv.classList.remove('hidden');
+                setupVirtualKeyboard();
+                updateSuggestion();
+            }
+        });
+
+        textarea.addEventListener('blur', () => {
+            setTimeout(() => {
+                if (document.getElementById('language').value === 'hindi' && document.activeElement !== textarea) {
+                    keyboardDiv.classList.add('hidden');
+                }
+            }, 200); // Delay to allow clicking keyboard buttons
+        });
+
+        textarea.addEventListener('input', updateSuggestion);
+
+        // Initialize virtual keyboard and placeholder
+        if (document.getElementById('language').value === 'hindi' && document.activeElement === textarea) {
+            keyboardDiv.classList.remove('hidden');
+            setupVirtualKeyboard();
+            updateSuggestion();
+        }
+        document.getElementById('mantraInput').placeholder = document.getElementById('language').value === 'hindi' ? hindiMantra : hinglishMantra;
+        document.getElementById('mantraHint').innerHTML = `Correct mantra: <em>${document.getElementById('language').value === 'hindi' ? hindiMantra : hinglishMantra}</em>`;
+
+        // Click suggestion to insert
+        suggestionDiv.addEventListener('click', () => {
+            const textarea = document.getElementById('mantraInput');
+            const suggestion = suggestionDiv.textContent;
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            textarea.value = text.slice(0, start) + suggestion + text.slice(end);
+            textarea.selectionStart = textarea.selectionEnd = start + suggestion.length;
+            updateSuggestion();
+            textarea.focus();
+        });
+
+        // Levenshtein distance function for lenient comparison
+        function levenshtein(a, b) {
+            const matrix = Array(b.length + 1).fill().map(() => Array(a.length + 1).fill(0));
+            for (let i = 0; i <= a.length; i++) matrix[0][i] = i;
+            for (let j = 0; j <= b.length; j++) matrix[j][0] = j;
+            for (let j = 1; j <= b.length; j++) {
+                for (let i = 1; i <= a.length; i++) {
+                    const indicator = a[i - 1] === b[j - 1] ? 0 : 1;
+                    matrix[j][i] = Math.min(
+                        matrix[j][i - 1] + 1, // deletion
+                        matrix[j - 1][i] + 1, // insertion
+                        matrix[j - 1][i - 1] + indicator // substitution
+                    );
+                }
+            }
             return matrix[b.length][a.length];
+        }
+
+        // Function to normalize text for comparison
+        function normalizeText(text) {
+            return text.trim().replace(/\s+/g, ' ').replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '');
         }
 
         // Function to check if input is close enough to the correct mantra
         function isMantraCorrect(input, correctMantra) {
             const normalizedInput = normalizeText(input);
             const normalizedCorrect = normalizeText(correctMantra);
-            const inputWords = normalizedInput.split(' ');
-            const correctWords = normalizedCorrect.split(' ');
-            
-            // Check if word count matches
-            if (Math.abs(inputWords.length - correctWords.length) > 1) return false;
-
-            // Calculate total Levenshtein distance for all words
-            let totalDistance = 0;
-            const minLength = Math.min(inputWords.length, correctWords.length);
-            for (let i = 0; i < minLength; i++) {
-                totalDistance += levenshteinDistance(inputWords[i], correctWords[i] || '');
-            }
-
-            // Allow up to 10 character differences total and ensure word count is close
-            return totalDistance <= 10 && Math.abs(inputWords.length - correctWords.length) <= 1;
+            const distance = levenshtein(normalizedInput, normalizedCorrect);
+            return distance <= 10; // Allow up to 10 character differences
         }
 
         // Function to update progress bar
@@ -263,18 +433,6 @@
                 error.textContent = language === 'hindi' ? "कृपया मंत्र को ठीक करें।" : "Please correct the mantra.";
             }
         });
-
-        // Update placeholder and hint based on language selection
-        document.getElementById('language').addEventListener('change', (e) => {
-            const language = e.target.value;
-            const placeholder = language === 'hindi' ? hindiMantra : hinglishMantra;
-            document.getElementById('mantraInput').placeholder = placeholder;
-            document.getElementById('mantraHint').innerHTML = `Correct mantra: <em>${placeholder}</em>`;
-        });
-
-        // Initialize placeholder and hint
-        document.getElementById('mantraInput').placeholder = document.getElementById('language').value === 'hindi' ? hindiMantra : hinglishMantra;
-        document.getElementById('mantraHint').innerHTML = `Correct mantra: <em>${document.getElementById('language').value === 'hindi' ? hindiMantra : hinglishMantra}</em>`;
     </script>
 </body>
 </html>
