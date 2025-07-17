@@ -13,7 +13,7 @@
             background-position: center;
             background-attachment: fixed;
             min-height: 100vh;
-            color: #ff0000; /* Red text for all text elements */
+            color: #000000; /* Black text for all text elements */
             font-family: 'Noto Serif', serif;
         }
         .container {
@@ -43,6 +43,12 @@
         .submit-btn {
             transition: all 0.3s ease;
             box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+            color: #000000; /* Black text for button */
+            text-shadow: 
+                -1px -1px 0 #ffff00,  
+                1px -1px 0 #ffff00,
+                -1px 1px 0 #ffff00,
+                1px 1px 0 #ffff00; /* Yellow border effect for button text */
         }
         .submit-btn:hover {
             transform: translateY(-2px);
@@ -77,10 +83,17 @@
         }
         .text-bordered {
             text-shadow: 
-                -1px -1px 0 #000000,  
-                1px -1px 0 #000000,
-                -1px 1px 0 #000000,
-                1px 1px 0 #000000; /* Black border effect around text */
+                -1px -1px 0 #ffff00,  
+                1px -1px 0 #ffff00,
+                -1px 1px 0 #ffff00,
+                1px 1px 0 #ffff00; /* Yellow border effect around text */
+        }
+        .mantra-label {
+            font-size: 1rem; /* Smaller font size for Type Gayatri Mantra label */
+        }
+        .mantra-hint {
+            font-size: 1.75rem; /* Larger font size for reference mantra */
+            font-weight: bold; /* Bold text for reference mantra */
         }
     </style>
 </head>
@@ -101,12 +114,12 @@
             </select>
         </div>
         <div class="mb-6">
-            <p id="mantraHint" class="text-base mb-3 italic devanagari text-bordered">Correct mantra: <em>ॐ भूर्भुवः स्वः तत्सवितुर्वरेण्यं भर्गो देवस्य धीमहि धियो यो नः प्रचोदयात्</em></p>
-            <label class="block text-xl font-semibold mb-2 devanagari text-bordered">Type Gayatri Mantra / गायत्री मंत्र टाइप करें (Attempt <span id="attempt">1</span>/3)</label>
+            <p id="mantraHint" class="text-base mb-3 italic devanagari text-bordered mantra-hint">Correct mantra: <em>ॐ भूर्भुवः स्वः तत्सवितुर्वरेण्यं भर्गो देवस्य धीमहि धियो यो नः प्रचोदयात्</em></p>
+            <label class="block font-semibold mb-2 devanagari text-bordered mantra-label">Type Gayatri Mantra / गायत्री मंत्र टाइप करें (Attempt <span id="attempt">1</span>/3)</label>
             <textarea id="mantraInput" rows="5" class="mt-1 block w-full p-3 border rounded devanagari" placeholder="Type the mantra here..." onpaste="return false;"></textarea>
             <p id="error" class="text-red-400 text-base mt-2 hidden devanagari text-bordered"></p>
         </div>
-        <button id="submitBtn" class="w-full submit-btn bg-amber-600 text-white p-3 rounded-lg font-bold devanagari text-bordered">Submit / जमा करें</button>
+        <button id="submitBtn" class="w-full submit-btn bg-amber-600 p-3 rounded-lg font-bold devanagari">Submit / जमा करें</button>
         <div class="mt-6 text-center">
             <p class="text-xl devanagari text-bordered">Your Points / आपके अंक: <span id="points">0</span></p>
             <p id="reward" class="text-green-400 text-xl hidden devanagari text-bordered">Congratulations! You've earned a reward: <span id="rewardText"></span> / बधाई हो! आपने एक पुरस्कार अर्जित किया: <span id="rewardText"></span></p>
@@ -122,7 +135,7 @@
 
     <script>
         const hindiMantra = "ॐ भूर्भुवः स्वः तत्सवितुर्वरेण्यं भर्गो देवस्य धीमहि धियो यो नः प्रचोदयात्";
-        const hinglishMantra = "Om Bhur Bhuvah Swah Tat Savitur Varenyam Bhargo Devasya Dheemahi Dhiyo Yo Nah Prachodayat";
+        const hinglishMantra = "Om Bhur Bhuvah Swah Tat Savitur Varenyam Bhargo Devasya Dheemahi Dhiyo Yonah Prachodayat";
         const maxAttempts = 3;
         let currentAttempt = 1;
         let points = localStorage.getItem('points') ? parseInt(localStorage.getItem('points')) : 0;
@@ -137,20 +150,56 @@
 
         // Function to normalize text for comparison
         function normalizeText(text) {
-            return text.trim().toLowerCase().replace(/\s+/g, ' ').replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '');
+            return text.trim().toLowerCase()
+                .replace(/[,.\\/#!$%^&*;:{}=_`~()]/g, '') // Remove punctuation
+                .replace(/\s+/g, ' ') // Normalize spaces
+                .replace(/yo\s+nah/, 'yonah'); // Treat "yo nah" as "yonah"
+        }
+
+        // Function to calculate Levenshtein distance for spelling tolerance
+        function levenshteinDistance(a, b) {
+            const matrix = [];
+            for (let i = 0; i <= b.length; i++) {
+                matrix[i] = [i];
+            }
+            for (let j = 0; j <= a.length; j++) {
+                matrix[0][j] = j;
+            }
+            for (let i = 1; i <= b.length; i++) {
+                for (let j = 1; j <= a.length; j++) {
+                    if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                        matrix[i][j] = matrix[i - 1][j - 1];
+                    } else {
+                        matrix[i][j] = Math.min(
+                            matrix[i - 1][j - 1] + 1,
+                            matrix[i][j - 1] + 1,
+                            matrix[i - 1][j] + 1
+                        );
+                    }
+                }
+            }
+            return matrix[b.length][a.length];
         }
 
         // Function to check if input is close enough to the correct mantra
         function isMantraCorrect(input, correctMantra) {
-            const inputWords = normalizeText(input).split(' ');
-            const correctWords = normalizeText(correctMantra).split(' ');
-            let differences = 0;
-            if (inputWords.length !== correctWords.length) return false;
-            for (let i = 0; i < inputWords.length; i++) {
-                if (inputWords[i] !== correctWords[i]) differences++;
-                if (differences > 2) return false; // Allow up to 2 word differences
+            const normalizedInput = normalizeText(input);
+            const normalizedCorrect = normalizeText(correctMantra);
+            const inputWords = normalizedInput.split(' ');
+            const correctWords = normalizedCorrect.split(' ');
+            
+            // Check if word count matches
+            if (Math.abs(inputWords.length - correctWords.length) > 1) return false;
+
+            // Calculate total Levenshtein distance for all words
+            let totalDistance = 0;
+            const minLength = Math.min(inputWords.length, correctWords.length);
+            for (let i = 0; i < minLength; i++) {
+                totalDistance += levenshteinDistance(inputWords[i], correctWords[i] || '');
             }
-            return true;
+
+            // Allow up to 10 character differences total and ensure word count is close
+            return totalDistance <= 10 && Math.abs(inputWords.length - correctWords.length) <= 1;
         }
 
         // Function to update progress bar
